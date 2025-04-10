@@ -1,0 +1,10 @@
+name: Terraform CI
+on:
+  push:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  build:
+    uses: meshcloud/shared-workflows/.github/workflows/terraform-meshplatform-modules-build-workflow.yml@main
