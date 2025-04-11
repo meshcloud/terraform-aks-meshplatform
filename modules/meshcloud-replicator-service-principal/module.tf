@@ -181,34 +181,34 @@ resource "azuread_app_role_assignment" "meshcloud_replicator-user" {
 // Policy Definition for preventing the Application from assigning other privileges to itself
 // Assign it to the specified scope
 //---------------------------------------------------------------------------
-resource "azurerm_policy_definition" "privilege_escalation_prevention" {
-  name                = "meshStack-privilege-escalation-prevention-${local.spp_hash}"
-  policy_type         = "Custom"
-  mode                = "All"
-  description         = "Prevents assigning additional roles to the meshStack replicator service principal"
-  display_name        = "meshStack Privilege Escalation Prevention"
-  management_group_id = data.azurerm_subscription.aks.id
+# resource "azurerm_policy_definition" "privilege_escalation_prevention" {
+#   name                = "meshStack-privilege-escalation-prevention-${local.spp_hash}"
+#   policy_type         = "Custom"
+#   mode                = "All"
+#   description         = "Prevents assigning additional roles to the meshStack replicator service principal"
+#   display_name        = "meshStack Privilege Escalation Prevention"
+#   management_group_id = data.azurerm_subscription.aks.id
 
-  policy_rule = <<RULE
-  {
-      "if": {
-        "allOf": [
-          {
-            "equals": "Microsoft.Authorization/roleAssignments",
-            "field": "type"
-          },
-          {
-            "field": "Microsoft.Authorization/roleAssignments/principalId",
-            "equals": "${azuread_service_principal.meshcloud_replicator.object_id}"
-          }
-        ]
-      },
-      "then": {
-        "effect": "deny"
-      }
-  }
-RULE
-}
+#   policy_rule = <<RULE
+#   {
+#       "if": {
+#         "allOf": [
+#           {
+#             "equals": "Microsoft.Authorization/roleAssignments",
+#             "field": "type"
+#           },
+#           {
+#             "field": "Microsoft.Authorization/roleAssignments/principalId",
+#             "equals": "${azuread_service_principal.meshcloud_replicator.object_id}"
+#           }
+#         ]
+#       },
+#       "then": {
+#         "effect": "deny"
+#       }
+#   }
+# RULE
+# }
 
 # resource "terraform_data" "allowed_assignments" {
 #   input = compact(

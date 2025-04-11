@@ -5,6 +5,7 @@
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | > 1.0 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >=3.0.2 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >=4.26.0 |
 
 ## Modules
 
@@ -21,10 +22,13 @@ No modules.
 | [azuread_application_federated_identity_credential.meshcloud_replicator](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_federated_identity_credential) | resource |
 | [azuread_application_password.application_pw](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_password) | resource |
 | [azuread_service_principal.meshcloud_replicator](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/service_principal) | resource |
+| [azurerm_role_assignment.meshcloud_replicator](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_role_definition.meshcloud_replicator](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_definition) | resource |
 | [time_rotating.replicator_secret_rotation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/rotating) | resource |
 | [azuread_application_published_app_ids.well_known](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/application_published_app_ids) | data source |
 | [azuread_application_template.enterprise_app](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/application_template) | data source |
 | [azuread_service_principal.msgraph](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azurerm_subscription.aks](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
 
 ## Inputs
 
@@ -32,6 +36,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_owners"></a> [application\_owners](#input\_application\_owners) | List of user principals that should be added as owners to the replicator service principal. | `list(string)` | `[]` | no |
 | <a name="input_create_password"></a> [create\_password](#input\_create\_password) | Create a password for the enterprise application. | `bool` | n/a | yes |
+| <a name="input_scope"></a> [scope](#input\_scope) | The scope of the service principal. The scope is usually the id of the aks subscription | `string` | n/a | yes |
 | <a name="input_service_principal_name"></a> [service\_principal\_name](#input\_service\_principal\_name) | Display name of the replicator service principal. | `string` | n/a | yes |
 | <a name="input_workload_identity_federation"></a> [workload\_identity\_federation](#input\_workload\_identity\_federation) | Enable workload identity federation instead of using a password by providing these additional settings. Usually you should receive the required settings when attempting to configure a platform with workload identity federation in meshStack. | `object({ issuer = string, subject = string })` | `null` | no |
 
