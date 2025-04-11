@@ -63,8 +63,8 @@ Check [examples](./examples/) for examples.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_meshcloud-service-account-meshfed-metering"></a> [meshcloud-service-account-meshfed-metering](#module\_meshcloud-service-account-meshfed-metering) | ./modules/meshcloud-service-account-meshfed-metering | n/a |
-| <a name="module_meshcloud-service-account-meshfed-replicator"></a> [meshcloud-service-account-meshfed-replicator](#module\_meshcloud-service-account-meshfed-replicator) | ./modules/meshcloud-service-account-meshfed-replicator | n/a |
+| <a name="module_meshcloud-service-account-meshfed-metering"></a> [meshcloud-service-account-meshfed-metering](#module\_meshcloud-service-account-meshfed-metering) | git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git | v0.1.0 |
+| <a name="module_meshcloud-service-account-meshfed-replicator"></a> [meshcloud-service-account-meshfed-replicator](#module\_meshcloud-service-account-meshfed-replicator) | git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git | v0.1.0 |
 | <a name="module_replicator_service_principal"></a> [replicator\_service\_principal](#module\_replicator\_service\_principal) | ./modules/meshcloud-replicator-service-principal | n/a |
 
 ## Resources
