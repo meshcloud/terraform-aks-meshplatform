@@ -3,23 +3,6 @@ data "azurerm_subscription" "aks" {
 }
 
 //---------------------------------------------------------------------------
-// Terraform Settings
-//---------------------------------------------------------------------------
-terraform {
-  required_version = "> 1.0"
-  required_providers {
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = ">=3.0.2"
-    }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">=4.26.0"
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
 // Role Definition for the Replicator on the specified Scope
 //---------------------------------------------------------------------------
 resource "azurerm_role_definition" "meshcloud_replicator" {

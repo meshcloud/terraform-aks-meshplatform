@@ -55,6 +55,7 @@ Check [examples](./examples/) for examples.
 | Name | Version |
 |------|---------|
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >=3.0.2 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >=4.26.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >=2.15.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | 0.13.0 |
 
