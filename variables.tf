@@ -3,6 +3,11 @@ variable "metering_enabled" {
   default = true
 }
 
+variable "scope" {
+  type        = string
+  description = "The scope of the service principal. The scope is usually the id of the aks subscription"
+}
+
 variable "metering_additional_rules" {
   type = list(object({
     api_groups        = list(string)

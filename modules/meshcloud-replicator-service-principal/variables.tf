@@ -19,3 +19,8 @@ variable "application_owners" {
   description = "List of user principals that should be added as owners to the replicator service principal."
   default     = []
 }
+
+variable "scope" {
+  type        = string
+  description = "The scope of the service principal. The scope is usually the id of the aks subscription"
+}

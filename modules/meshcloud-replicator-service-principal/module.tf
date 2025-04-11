@@ -1,3 +1,7 @@
+data "azurerm_subscription" "aks" {
+  subscription_id = var.scope
+}
+
 //---------------------------------------------------------------------------
 // Terraform Settings
 //---------------------------------------------------------------------------
@@ -7,6 +11,10 @@ terraform {
     azuread = {
       source  = "hashicorp/azuread"
       version = ">=3.0.2"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">=4.26.0"
     }
   }
 }
@@ -18,54 +26,25 @@ terraform {
 //---------------------------------------------------------------------------
 // Role Definition for the Replicator on the specified Scope
 //---------------------------------------------------------------------------
-# resource "azurerm_role_definition" "meshcloud_replicator" {
-#   name        = "${var.service_principal_name}-base"
-#   scope       = var.custom_role_scope
-#   description = "Permissions required by meshStack replicator in order to configure subscriptions and manage users"
+resource "azurerm_role_definition" "meshcloud_replicator" {
+  name        = "${var.service_principal_name}-base"
+  scope       = data.azurerm_subscription.aks.id
+  description = "Permissions required by meshStack replicator in order to configure subscriptions and manage users"
 
-#   permissions {
-#     actions = concat([
+  permissions {
+    actions = [
+      "Microsoft.Resources/subscriptions/read",
+    ]
+  }
 
-#       # Assigning Users
-#       "Microsoft.Authorization/permissions/read",
-#       "Microsoft.Authorization/roleAssignments/*",
-#       "Microsoft.Authorization/roleDefinitions/read",
-
-#       # Assigning Blueprints
-#       "Microsoft.Resources/deployments/*",
-#       "Microsoft.Blueprint/blueprintAssignments/*",
-#       "Microsoft.Resources/subscriptions/resourceGroups/read",
-
-#       # Fetching Blueprints
-#       "Microsoft.Management/managementGroups/read",
-#       "Microsoft.Management/managementGroups/descendants/read",
-
-#       # Assigning Subscriptions to Management Groups
-#       "Microsoft.Management/managementGroups/subscriptions/write",
-#       "Microsoft.Management/managementGroups/write",
-#       # Permissions for reading and writing tags
-#       "Microsoft.Resources/tags/*",
-
-#       # Permission we need to activate/register required Resource Providers
-#       "*/register/action"
-#       ],
-#       var.replicator_rg_enabled ? [
-#         # Additional permission if this principal should be used for
-#         # Resource Group Azure replication as well
-#         "Microsoft.Resources/subscriptions/resourceGroups/write"
-#       ] : [],
-#       var.additional_permissions
-#     )
-#   }
-
-#   assignable_scopes = [
-#     var.custom_role_scope
-#   ]
-# }
+  assignable_scopes = [
+    data.azurerm_subscription.aks.id
+  ]
+}
 
 # resource "azurerm_role_definition" "meshcloud_replicator_subscription_canceler" {
 #   name        = "${var.service_principal_name}-cancel-subscriptions"
-#   scope       = var.custom_role_scope
+#   scope       = data.azurerm_subscription.aks.id
 #   description = "Additional permissions required by meshStack replicator in order to cancel subscriptions"
 
 #   permissions {
@@ -73,13 +52,13 @@ terraform {
 #   }
 
 #   assignable_scopes = [
-#     var.custom_role_scope
+#     data.azurerm_subscription.aks.id
 #   ]
 # }
 
 # resource "azurerm_role_definition" "meshcloud_replicator_rg_deleter" {
 #   name        = "${var.service_principal_name}-delete-resourceGroups"
-#   scope       = var.custom_role_scope
+#   scope       = data.azurerm_subscription.aks.id
 #   description = "Additional permissions required by meshStack replicator in order to delete Resource Groups"
 
 #   permissions {
@@ -87,7 +66,7 @@ terraform {
 #   }
 
 #   assignable_scopes = [
-#     var.custom_role_scope
+#     data.azurerm_subscription.aks.id
 #   ]
 # }
 
@@ -144,12 +123,11 @@ resource "azuread_service_principal" "meshcloud_replicator" {
 //---------------------------------------------------------------------------
 // Assign the created ARM role to the Enterprise application
 //---------------------------------------------------------------------------
-# resource "azurerm_role_assignment" "meshcloud_replicator" {
-#   for_each           = toset(var.assignment_scopes)
-#   scope              = each.key
-#   role_definition_id = azurerm_role_definition.meshcloud_replicator.role_definition_resource_id
-#   principal_id       = azuread_service_principal.meshcloud_replicator.object_id
-# }
+resource "azurerm_role_assignment" "meshcloud_replicator" {
+  scope              = data.azurerm_subscription.aks.id
+  role_definition_id = azurerm_role_definition.meshcloud_replicator.role_definition_resource_id
+  principal_id       = azuread_service_principal.meshcloud_replicator.object_id
+}
 
 # resource "azurerm_role_assignment" "meshcloud_replicator_subscription_canceler" {
 #   for_each           = toset(var.can_cancel_subscriptions_in_scopes)
@@ -199,38 +177,38 @@ resource "azuread_app_role_assignment" "meshcloud_replicator-user" {
   depends_on          = [azuread_application.meshcloud_replicator]
 }
 
-# //---------------------------------------------------------------------------
-# // Policy Definition for preventing the Application from assigning other privileges to itself
-# // Assign it to the specified scope
-# //---------------------------------------------------------------------------
-# resource "azurerm_policy_definition" "privilege_escalation_prevention" {
-#   name                = "meshStack-privilege-escalation-prevention-${local.spp_hash}"
-#   policy_type         = "Custom"
-#   mode                = "All"
-#   description         = "Prevents assigning additional roles to the meshStack replicator service principal"
-#   display_name        = "meshStack Privilege Escalation Prevention"
-#   management_group_id = var.custom_role_scope
+//---------------------------------------------------------------------------
+// Policy Definition for preventing the Application from assigning other privileges to itself
+// Assign it to the specified scope
+//---------------------------------------------------------------------------
+resource "azurerm_policy_definition" "privilege_escalation_prevention" {
+  name                = "meshStack-privilege-escalation-prevention-${local.spp_hash}"
+  policy_type         = "Custom"
+  mode                = "All"
+  description         = "Prevents assigning additional roles to the meshStack replicator service principal"
+  display_name        = "meshStack Privilege Escalation Prevention"
+  management_group_id = data.azurerm_subscription.aks.id
 
-#   policy_rule = <<RULE
-#   {
-#       "if": {
-#         "allOf": [
-#           {
-#             "equals": "Microsoft.Authorization/roleAssignments",
-#             "field": "type"
-#           },
-#           {
-#             "field": "Microsoft.Authorization/roleAssignments/principalId",
-#             "equals": "${azuread_service_principal.meshcloud_replicator.object_id}"
-#           }
-#         ]
-#       },
-#       "then": {
-#         "effect": "deny"
-#       }
-#   }
-# RULE
-# }
+  policy_rule = <<RULE
+  {
+      "if": {
+        "allOf": [
+          {
+            "equals": "Microsoft.Authorization/roleAssignments",
+            "field": "type"
+          },
+          {
+            "field": "Microsoft.Authorization/roleAssignments/principalId",
+            "equals": "${azuread_service_principal.meshcloud_replicator.object_id}"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+  }
+RULE
+}
 
 # resource "terraform_data" "allowed_assignments" {
 #   input = compact(
@@ -245,7 +223,7 @@ resource "azuread_app_role_assignment" "meshcloud_replicator-user" {
 #   name                 = "meshStack-PEP-${local.spp_hash}"
 #   description          = azurerm_policy_definition.privilege_escalation_prevention.description
 #   policy_definition_id = azurerm_policy_definition.privilege_escalation_prevention.id
-#   management_group_id  = var.custom_role_scope
+#   management_group_id  = data.azurerm_subscription.aks.id
 
 #   lifecycle {
 #     # ensure we unassign the policy whenver we make intentional changes to the replicators role assignments and then reassign it after
