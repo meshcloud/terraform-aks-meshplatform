@@ -19,10 +19,6 @@ terraform {
   }
 }
 
-# locals {
-#   spp_hash = substr(sha256(var.service_principal_name), 0, 5)
-# }
-
 //---------------------------------------------------------------------------
 // Role Definition for the Replicator on the specified Scope
 //---------------------------------------------------------------------------
@@ -34,6 +30,8 @@ resource "azurerm_role_definition" "meshcloud_replicator" {
   permissions {
     actions = [
       "Microsoft.Resources/subscriptions/read",
+      "Microsoft.Authorization/roleAssignments/*"
+
     ]
   }
 
@@ -41,34 +39,6 @@ resource "azurerm_role_definition" "meshcloud_replicator" {
     data.azurerm_subscription.aks.id
   ]
 }
-
-# resource "azurerm_role_definition" "meshcloud_replicator_subscription_canceler" {
-#   name        = "${var.service_principal_name}-cancel-subscriptions"
-#   scope       = data.azurerm_subscription.aks.id
-#   description = "Additional permissions required by meshStack replicator in order to cancel subscriptions"
-
-#   permissions {
-#     actions = ["Microsoft.Subscription/cancel/action"]
-#   }
-
-#   assignable_scopes = [
-#     data.azurerm_subscription.aks.id
-#   ]
-# }
-
-# resource "azurerm_role_definition" "meshcloud_replicator_rg_deleter" {
-#   name        = "${var.service_principal_name}-delete-resourceGroups"
-#   scope       = data.azurerm_subscription.aks.id
-#   description = "Additional permissions required by meshStack replicator in order to delete Resource Groups"
-
-#   permissions {
-#     actions = ["Microsoft.Resources/subscriptions/resourceGroups/delete"]
-#   }
-
-#   assignable_scopes = [
-#     data.azurerm_subscription.aks.id
-#   ]
-# }
 
 //---------------------------------------------------------------------------
 // Queries Entra ID for information about well-known application IDs.
@@ -129,30 +99,6 @@ resource "azurerm_role_assignment" "meshcloud_replicator" {
   principal_id       = azuread_service_principal.meshcloud_replicator.object_id
 }
 
-# resource "azurerm_role_assignment" "meshcloud_replicator_subscription_canceler" {
-#   for_each           = toset(var.can_cancel_subscriptions_in_scopes)
-#   scope              = each.key
-#   role_definition_id = azurerm_role_definition.meshcloud_replicator_subscription_canceler.role_definition_resource_id
-#   principal_id       = azuread_service_principal.meshcloud_replicator.object_id
-# }
-
-# resource "azurerm_role_assignment" "meshcloud_replicator_rg_deleter" {
-#   for_each     = toset(var.can_delete_rgs_in_scopes)
-#   scope        = each.key
-#   principal_id = azuread_service_principal.meshcloud_replicator.object_id
-
-#   # The azurerm provider requires this must be a scoped id, so unfortuantely we need to construct the id of the role
-#   # definition at the assignment scope in order to make this stable for subsequent terraform apply's.
-#   # See https://github.com/hashicorp/terraform-provider-azurerm/issues/4847#issuecomment-2085122502
-#   # Apparently, this problem only comes up when the scope is a subscription, it seems management groups are not affected.
-#   # RG deletion is typically only selectively enabled for specific subscriptions.
-#   role_definition_id = join("", [
-#     each.key,
-#     "/providers/Microsoft.Authorization/roleDefinitions/",
-#     azurerm_role_definition.meshcloud_replicator_rg_deleter.role_definition_id
-#   ])
-# }
-
 //---------------------------------------------------------------------------
 // Assign Entra ID Roles to the Enterprise application
 //---------------------------------------------------------------------------
@@ -176,98 +122,3 @@ resource "azuread_app_role_assignment" "meshcloud_replicator-user" {
   resource_object_id  = data.azuread_service_principal.msgraph.object_id
   depends_on          = [azuread_application.meshcloud_replicator]
 }
-
-//---------------------------------------------------------------------------
-// Policy Definition for preventing the Application from assigning other privileges to itself
-// Assign it to the specified scope
-//---------------------------------------------------------------------------
-# resource "azurerm_policy_definition" "privilege_escalation_prevention" {
-#   name                = "meshStack-privilege-escalation-prevention-${local.spp_hash}"
-#   policy_type         = "Custom"
-#   mode                = "All"
-#   description         = "Prevents assigning additional roles to the meshStack replicator service principal"
-#   display_name        = "meshStack Privilege Escalation Prevention"
-#   management_group_id = data.azurerm_subscription.aks.id
-
-#   policy_rule = <<RULE
-#   {
-#       "if": {
-#         "allOf": [
-#           {
-#             "equals": "Microsoft.Authorization/roleAssignments",
-#             "field": "type"
-#           },
-#           {
-#             "field": "Microsoft.Authorization/roleAssignments/principalId",
-#             "equals": "${azuread_service_principal.meshcloud_replicator.object_id}"
-#           }
-#         ]
-#       },
-#       "then": {
-#         "effect": "deny"
-#       }
-#   }
-# RULE
-# }
-
-# resource "terraform_data" "allowed_assignments" {
-#   input = compact(
-#     concat(
-#       var.assignment_scopes,
-#       var.can_cancel_subscriptions_in_scopes,
-#       var.can_delete_rgs_in_scopes
-#   ))
-# }
-
-# resource "azurerm_management_group_policy_assignment" "privilege-escalation-prevention" {
-#   name                 = "meshStack-PEP-${local.spp_hash}"
-#   description          = azurerm_policy_definition.privilege_escalation_prevention.description
-#   policy_definition_id = azurerm_policy_definition.privilege_escalation_prevention.id
-#   management_group_id  = data.azurerm_subscription.aks.id
-
-#   lifecycle {
-#     # ensure we unassign the policy whenver we make intentional changes to the replicators role assignments and then reassign it after
-#     # note that we can't directly depend on the azurerm_role_assignment resources here because terraform fails with
-#     # >  Error: no change found for azurerm_role_assignment.meshcloud_replicator_rg_deleter
-#     # whenever no role_assignment exists because the for_each condition is empty (so no instances exist).
-#     # We therefore trigger the replacement directly using the for_each keys
-#     replace_triggered_by = [
-#       terraform_data.allowed_assignments
-#     ]
-#   }
-
-#   # only deploy this after the replicator roles have been assigned, here it's fine for terraform to directly reference
-#   # resources that use for_each, even if there are no instances of that resources
-#   depends_on = [
-#     azurerm_role_assignment.meshcloud_replicator,
-#     azurerm_role_assignment.meshcloud_replicator_rg_deleter,
-#     azurerm_role_assignment.meshcloud_replicator_subscription_canceler
-#   ]
-# }
-
-# //---------------------------------------------------------------------------
-# // Administrative Unit
-# //---------------------------------------------------------------------------
-# resource "azuread_administrative_unit" "meshcloud_replicator_au" {
-#   count        = var.administrative_unit_name == null ? 0 : 1
-#   description  = "Administrative Unit for meshStack replicator"
-#   display_name = var.administrative_unit_name
-# }
-
-# //---------------------------------------------------------------------------
-# // Directory Role (Admin Role)
-# //---------------------------------------------------------------------------
-# resource "azuread_directory_role" "meshcloud_replicator_role" {
-#   count        = var.administrative_unit_name == null ? 0 : 1
-#   display_name = "Groups Administrator"
-# }
-
-# //---------------------------------------------------------------------------
-# // Assign the Service Principal to the Directory Role in the Administrative Unit
-# //---------------------------------------------------------------------------
-# resource "azuread_administrative_unit_role_member" "meshcloud_replicator_role_member" {
-#   count                         = var.administrative_unit_name == null ? 0 : 1
-#   role_object_id                = azuread_directory_role.meshcloud_replicator_role[0].object_id
-#   administrative_unit_object_id = azuread_administrative_unit.meshcloud_replicator_au[0].object_id
-#   member_object_id              = azuread_service_principal.meshcloud_replicator.object_id
-# }
