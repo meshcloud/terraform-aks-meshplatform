@@ -13,7 +13,7 @@ module "replicator_service_principal" {
   create_password        = var.create_password
   workload_identity_federation = var.workload_identity_federation == null ? null : {
     issuer  = var.workload_identity_federation.issuer,
-    subject = var.workload_identity_federation.subject
+    subject = var.workload_identity_federation.replicator_subject
   }
   application_owners = var.application_owners
 }
