@@ -1,5 +1,6 @@
 variable "service_principal_name" {
   type        = string
+  default     = null
   description = "Display name of the replicator service principal."
 }
 

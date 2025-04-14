@@ -6,7 +6,7 @@ resource "kubernetes_namespace" "meshcloud" {
 }
 
 module "replicator_service_principal" {
-  count                  = var.replicator_enabled ? 1 : 0
+  count                  = var.replicator_enabled || var.service_principal_name != null ? 1 : 0
   scope                  = var.scope
   source                 = "./modules/meshcloud-replicator-service-principal"
   service_principal_name = var.service_principal_name
