@@ -17,17 +17,17 @@ module "replicator_service_principal" {
   }
   application_owners = var.application_owners
 }
-//add source ref v0.1.0
+
 module "meshcloud-service-account-meshfed-metering" {
   count            = var.metering_enabled ? 1 : 0
-  source           = "git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git?ref=v0.1.0"
+  source           = "git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-metering?ref=v0.1.0"
   namespace        = kubernetes_namespace.meshcloud.metadata.0.name
   additional_rules = var.metering_additional_rules
 }
 
 module "meshcloud-service-account-meshfed-replicator" {
   count            = var.replicator_enabled ? 1 : 0
-  source           = "git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git?ref=v0.1.0"
+  source           = "git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-replicator?ref=v0.1.0"
   namespace        = kubernetes_namespace.meshcloud.metadata.0.name
   additional_rules = var.replicator_additional_rules
 }
