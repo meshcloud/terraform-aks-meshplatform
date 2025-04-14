@@ -1,19 +1,64 @@
 # AKS meshPlatform Module
 
-Terraform module to integrate AKS as a meshPlatform into meshStack instance. The output of this module is a set of Service Account credentials that need to be configured in meshStack as described in [meshcloud public docs](https://docs.meshcloud.io/docs/meshstack.how-to.integrate-meshplatform.html).
+Terraform module to integrate AKS as a meshPlatform into a meshStack instance. The output of this module is a set of Service Account credentials that need to be configured in meshStack as described in [meshcloud public docs](https://docs.meshcloud.io/docs/meshstack.how-to.integrate-meshplatform.html).
 
 ## Prerequisites
 
 To run this module, you need:
 
-- cluster admin permissions on the cluster
+- Cluster admin permissions on the cluster
 - [Terraform installed](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 - [kubectl installed](https://kubernetes.io/docs/tasks/tools/#kubectl)
 
 To integrate an AKS cluster, you additionally need:
 
 - An AKS cluster with [Azure AD enabled](https://learn.microsoft.com/en-us/azure/aks/managed-aad)
-- Integrate [RBAC based user access](https://learn.microsoft.com/en-us/azure/aks/manage-azure-rbac) with the AKS cluster
+- Integrate [RBAC-based user access](https://learn.microsoft.com/en-us/azure/aks/manage-azure-rbac) with the AKS cluster
+
+## Usage
+
+Below is an example of how to use this module in your Terraform configuration:
+
+```terraform
+module "aks_meshplatform" {
+  source = "path/to/this/module"
+
+  namespace                  = "meshcloud"
+  metering_enabled           = true
+  replicator_enabled         = true
+  scope                      = "your-aks-subscription-id"
+  service_principal_name     = "replicator-service-principal"
+  create_password            = true
+  workload_identity_federation = {
+    issuer  = "https://issuer.example.com"
+    subject = "subject-claim"
+  }
+  application_owners = ["user1@example.com", "user2@example.com"]
+}
+```
+
+## Outputs
+After applying the configuration, you can retrieve the following outputs using `terraform output`:
+
+- **Replicator Service Principal Credentials**
+  ```bash
+  terraform output replicator_service_principal
+  ```
+
+- **Replicator Service Principal Password**
+  ```bash
+  terraform output replicator_service_principal_password
+  ```
+
+- **Metering Service Account Token**
+  ```bash
+  terraform output metering_token
+  ```
+
+- **Replicator Service Account Token**
+  ```bash
+  terraform output replicator_token
+  ```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
