@@ -1,3 +1,9 @@
+variable "namespace" {
+  type        = string
+  default     = "meshcloud"
+  description = "name of the namespace where the replicator and metering components should be deployed"
+}
+
 variable "metering_enabled" {
   type    = bool
   default = true

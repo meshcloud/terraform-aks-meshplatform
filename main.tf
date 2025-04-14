@@ -1,7 +1,7 @@
 # Kubernetes Namespace
 resource "kubernetes_namespace" "meshcloud" {
   metadata {
-    name = "meshcloud"
+    name = var.namespace
   }
 }
 

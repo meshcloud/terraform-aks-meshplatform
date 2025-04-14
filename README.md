@@ -15,40 +15,6 @@ To integrate an AKS cluster, you additionally need:
 - An AKS cluster with [Azure AD enabled](https://learn.microsoft.com/en-us/azure/aks/managed-aad)
 - Integrate [RBAC based user access](https://learn.microsoft.com/en-us/azure/aks/manage-azure-rbac) with the AKS cluster
 
-## How to Use This Module
-
-### Using CLI
-
-1. Download the example `main.tf` and `outputs.tf` files.
-
-    ```powershell
-    # Downloads main.tf and outputs.tf files into ~/terraform-aks-meshplatform
-    wget https://raw.githubusercontent.com/meshcloud/terraform-aks-meshplatform/main/examples/basic-aks-integration/main.tf -P ~/terraform-aks-meshplatform
-    wget https://raw.githubusercontent.com/meshcloud/terraform-aks-meshplatform/main/examples/basic-aks-integration/outputs.tf -P ~/terraform-aks-meshplatform
-    ```
-
-2. Open `~/terraform-aks-meshplatform/main.tf` with a text editor. Modify the module variables and Terraform state backend settings in the file.
-
-3. Execute the module.
-
-    ```powershell
-    # Changes into ~/terraform-aks-meshplatform and applies terraform
-    cd ~/terraform-aks-meshplatform
-    terraform init
-    terraform apply
-    ```
-
-4. Configure the meshPlatform with the output provided by terraform.
-
-    ```sh
-    # The JSON output contains sensitive values that must not be transmitted to meshcloud in plain text.
-    terraform output -json
-    ```
-
-## Example Usages
-
-Check [examples](./examples/) for examples.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -81,6 +47,7 @@ Check [examples](./examples/) for examples.
 | <a name="input_create_password"></a> [create\_password](#input\_create\_password) | Create a password for the enterprise application. | `bool` | n/a | yes |
 | <a name="input_metering_additional_rules"></a> [metering\_additional\_rules](#input\_metering\_additional\_rules) | n/a | <pre>list(object({<br/>    api_groups        = list(string)<br/>    resources         = list(string)<br/>    verbs             = list(string)<br/>    resource_names    = optional(list(string))<br/>    non_resource_urls = optional(list(string))<br/>  }))</pre> | `[]` | no |
 | <a name="input_metering_enabled"></a> [metering\_enabled](#input\_metering\_enabled) | n/a | `bool` | `true` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | name of the namespace where the replicator and metering components should be deployed | `string` | `"meshcloud"` | no |
 | <a name="input_replicator_additional_rules"></a> [replicator\_additional\_rules](#input\_replicator\_additional\_rules) | n/a | <pre>list(object({<br/>    api_groups        = list(string)<br/>    resources         = list(string)<br/>    verbs             = list(string)<br/>    resource_names    = optional(list(string))<br/>    non_resource_urls = optional(list(string))<br/>  }))</pre> | `[]` | no |
 | <a name="input_replicator_enabled"></a> [replicator\_enabled](#input\_replicator\_enabled) | n/a | `bool` | `true` | no |
 | <a name="input_scope"></a> [scope](#input\_scope) | The scope of the service principal. The scope is usually the id of the aks subscription | `string` | n/a | yes |
