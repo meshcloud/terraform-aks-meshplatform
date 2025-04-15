@@ -12,7 +12,7 @@ variable "create_password" {
 variable "workload_identity_federation" {
   default     = null
   description = "Enable workload identity federation instead of using a password by providing these additional settings. Usually you should receive the required settings when attempting to configure a platform with workload identity federation in meshStack."
-  type        = object({ issuer = string, replicator_subject = string })
+  type        = object({ issuer = string, access_subject = string })
 }
 
 variable "application_owners" {
