@@ -36,5 +36,5 @@ resource "azuread_application_federated_identity_credential" "meshcloud_replicat
   display_name   = var.service_principal_name
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = var.workload_identity_federation.issuer
-  subject        = var.workload_identity_federation.replicator_subject
+  subject        = var.workload_identity_federation.access_subject
 }
