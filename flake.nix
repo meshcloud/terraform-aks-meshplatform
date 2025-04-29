@@ -65,7 +65,7 @@
             pkgs = importNixpkgs "x86_64-linux";
           in
           pkgs.mkShell {
-            name = "meshstack-hub-ghactions";
+            name = "terraform-aks-meshplatform";
             packages = (core_packages pkgs);
           };
       };
