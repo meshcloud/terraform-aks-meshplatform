@@ -74,8 +74,8 @@ After applying the configuration, you can retrieve the following outputs using `
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_meshcloud-service-account-meshfed-metering"></a> [meshcloud-service-account-meshfed-metering](#module\_meshcloud-service-account-meshfed-metering) | git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-metering | v0.1.0 |
-| <a name="module_meshcloud-service-account-meshfed-replicator"></a> [meshcloud-service-account-meshfed-replicator](#module\_meshcloud-service-account-meshfed-replicator) | git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-replicator | v0.1.0 |
+| <a name="module_meshcloud-service-account-meshfed-metering"></a> [meshcloud-service-account-meshfed-metering](#module\_meshcloud-service-account-meshfed-metering) | git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-metering | v0.2.0 |
+| <a name="module_meshcloud-service-account-meshfed-replicator"></a> [meshcloud-service-account-meshfed-replicator](#module\_meshcloud-service-account-meshfed-replicator) | git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-replicator | v0.2.0 |
 | <a name="module_replicator_service_principal"></a> [replicator\_service\_principal](#module\_replicator\_service\_principal) | ./modules/meshcloud-replicator-service-principal | n/a |
 
 ## Resources
@@ -90,6 +90,10 @@ After applying the configuration, you can retrieve the following outputs using `
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_owners"></a> [application\_owners](#input\_application\_owners) | List of user principals that should be added as owners to the replicator service principal. | `list(string)` | `[]` | no |
 | <a name="input_create_password"></a> [create\_password](#input\_create\_password) | Create a password for the enterprise application. | `bool` | n/a | yes |
+| <a name="input_existing_clusterrole_name_metering"></a> [existing\_clusterrole\_name\_metering](#input\_existing\_clusterrole\_name\_metering) | Name of an existing ClusterRole to use for metering instead of creating a new one. If empty, a new ClusterRole will be created. | `string` | `""` | no |
+| <a name="input_existing_clusterrole_name_replicator"></a> [existing\_clusterrole\_name\_replicator](#input\_existing\_clusterrole\_name\_replicator) | Name of an existing ClusterRole to use for replicator instead of creating a new one. If empty, a new ClusterRole will be created. | `string` | `""` | no |
+| <a name="input_kubernetes_name_suffix_metering"></a> [kubernetes\_name\_suffix\_metering](#input\_kubernetes\_name\_suffix\_metering) | Suffix to append to ClusterRole and ClusterRoleBinding names to support multiple metering instances | `string` | `""` | no |
+| <a name="input_kubernetes_name_suffix_replicator"></a> [kubernetes\_name\_suffix\_replicator](#input\_kubernetes\_name\_suffix\_replicator) | Suffix to append to ClusterRole and ClusterRoleBinding names to support multiple replicator instances | `string` | `""` | no |
 | <a name="input_metering_additional_rules"></a> [metering\_additional\_rules](#input\_metering\_additional\_rules) | n/a | <pre>list(object({<br>    api_groups        = list(string)<br>    resources         = list(string)<br>    verbs             = list(string)<br>    resource_names    = optional(list(string))<br>    non_resource_urls = optional(list(string))<br>  }))</pre> | `[]` | no |
 | <a name="input_metering_enabled"></a> [metering\_enabled](#input\_metering\_enabled) | n/a | `bool` | `true` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | name of the namespace where the replicator and metering components should be deployed | `string` | `"meshcloud"` | no |
