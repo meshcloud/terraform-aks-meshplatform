@@ -9,6 +9,30 @@ variable "metering_enabled" {
   default = true
 }
 
+variable "existing_clusterrole_name_replicator" {
+  type        = string
+  description = "Name of an existing ClusterRole to use for replicator instead of creating a new one. If empty, a new ClusterRole will be created."
+  default     = ""
+}
+
+variable "kubernetes_name_suffix_replicator" {
+  type        = string
+  description = "Suffix to append to ClusterRole and ClusterRoleBinding names to support multiple replicator instances"
+  default     = ""
+}
+
+variable "existing_clusterrole_name_metering" {
+  type        = string
+  description = "Name of an existing ClusterRole to use for metering instead of creating a new one. If empty, a new ClusterRole will be created."
+  default     = ""
+}
+
+variable "kubernetes_name_suffix_metering" {
+  type        = string
+  description = "Suffix to append to ClusterRole and ClusterRoleBinding names to support multiple metering instances"
+  default     = ""
+}
+
 variable "scope" {
   type        = string
   description = "The scope of the service principal. The scope is usually the id of the aks subscription"
