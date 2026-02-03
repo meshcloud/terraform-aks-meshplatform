@@ -37,6 +37,8 @@ module "aks_meshplatform" {
 }
 ```
 
+For a comprehensive example that includes configuring the `meshstack_platform` and `meshstack_landingzone` resources, see [here](https://github.com/meshcloud/meshstack-hub/blob/main/modules/aks/meshstack_integration.tf).
+
 ## Outputs
 After applying the configuration, you can retrieve the following outputs using `terraform output`:
 
