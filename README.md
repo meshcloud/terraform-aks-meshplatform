@@ -84,7 +84,7 @@ After applying the configuration, you can retrieve the following outputs using `
 
 | Name | Type |
 |------|------|
-| [kubernetes_namespace.meshcloud](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
+| [kubernetes_namespace_v1.meshcloud](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
 
 ## Inputs
 
