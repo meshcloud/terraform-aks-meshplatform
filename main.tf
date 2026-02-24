@@ -1,8 +1,13 @@
 # Kubernetes Namespace
-resource "kubernetes_namespace" "meshcloud" {
+resource "kubernetes_namespace_v1" "meshcloud" {
   metadata {
     name = var.namespace
   }
+}
+
+moved {
+  from = kubernetes_namespace.meshcloud
+  to   = kubernetes_namespace_v1.meshcloud
 }
 
 module "replicator_service_principal" {
@@ -21,7 +26,7 @@ module "replicator_service_principal" {
 module "meshcloud-service-account-meshfed-metering" {
   count                     = var.metering_enabled ? 1 : 0
   source                    = "git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-metering?ref=v0.2.0"
-  namespace                 = kubernetes_namespace.meshcloud.metadata.0.name
+  namespace                 = kubernetes_namespace_v1.meshcloud.metadata.0.name
   existing_clusterrole_name = var.existing_clusterrole_name_metering
   name_suffix               = var.kubernetes_name_suffix_metering
   additional_rules          = var.metering_additional_rules
@@ -30,7 +35,7 @@ module "meshcloud-service-account-meshfed-metering" {
 module "meshcloud-service-account-meshfed-replicator" {
   count                     = var.replicator_enabled ? 1 : 0
   source                    = "git::https://github.com/meshcloud/terraform-kubernetes-meshplatform.git//modules/meshcloud-service-account-meshfed-replicator?ref=v0.2.0"
-  namespace                 = kubernetes_namespace.meshcloud.metadata.0.name
+  namespace                 = kubernetes_namespace_v1.meshcloud.metadata.0.name
   existing_clusterrole_name = var.existing_clusterrole_name_replicator
   name_suffix               = var.kubernetes_name_suffix_replicator
   additional_rules          = var.replicator_additional_rules
